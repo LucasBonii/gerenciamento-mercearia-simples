@@ -29,8 +29,114 @@ class ControllerCategoria:
                     del x[i]
                     break
             print('Categoria removida com sucesso!')
-
+            #TODO: Remover no estoque
             with open('categoria.txt', 'w') as arq:
                 for i in x:
                     arq.writelines(i.categoria)
                     arq.writelines('\n')
+
+    def alterarCategoria(self, categoriaAlterar, categoriaAlterada):
+    
+        x = DaoCategoria.ler()
+
+        cat = list(filter(lambda x: x.categoria == categoriaAlterar, x))
+
+        if len(cat) >=0:
+            cat1 = list(filter(lambda x: x.categoria == categoriaAlterada, x))
+            if len(cat1) == 0:
+                x = list(map(lambda x: Categoria(categoriaAlterada) if(x.categoria==categoriaAlterar) else(x)), x)
+                print('Alteração efetuada com sucesso.')
+            else:
+                print('A categoria já existe.')
+        
+        else:
+            print('A categoria não existe.')
+        #TODO: Alterar no estoque
+        with open('categoria.txt', 'w') as arq:
+            for i in x:
+                arq.writelines(i.categoria)
+                arq.writelines('\n')
+
+    def mostrarCategoria(self):
+        categorias = DaoCategoria.ler()
+        if len(categorias) == 0:
+            print('Nenhuma categoria encontrada')
+            return 0
+        else:
+            for i in categorias:
+                print(f'Categoria: {i.categoria}')
+
+class ControllerEstoque:
+    def cadastrarProduto(self, nome, preco, cateogira, quantidade):
+        x = DaoEstoque.ler()
+        y = DaoCategoria.ler()
+
+        h = list(filter(lambda x: x.categoria == cateogira, y))
+        est = list(filter(lambda x: x.produto.nome == nome, x))
+
+        if len(h) > 0:
+            if len(est) == 0:
+                produto = Produtos(nome, preco, cateogira)
+                DaoEstoque.salvar(produto, quantidade)
+                print('Produto cadastrado com sucesso')
+            else:
+                print('Produto já existe em estoque')
+        else:
+            print("Categoria inexistente")
+
+    def removerProduto(self, nome):
+        x = DaoCategoria.ler()
+        est = list(filter(lambda x: x.produto.nome == nome, x))
+
+        if len(est) > 0:
+            for i in range(len(x)):
+                if x[i].produto.nome == nome:
+                    del x[i]
+                    print("Produto removido com sucesso.")
+                    break
+        else:
+            print('O produto não existe')
+
+        with open('estoque.txt', 'w') as arq:
+            for i in x:
+                arq.writelines(i.produto.nome + "|" + i.produto.preco + "|" +
+                           i.categoria + "|" + str(i.quantidade))
+            arq.writelines('\n')
+
+    def alterarProduto(self, nomeAlterar, novoNome, novaCategoria, novoPreco, novaQuantidade):
+        x = DaoEstoque.ler()
+        cat = DaoCategoria.ler()
+
+        y = list(filter(lambda x: x.categoria == novaCategoria, cat))
+
+        if len(y) >0:
+            est = list(filter(lambda x: x.produto.nome == nomeAlterar, x))
+            if len(est) > 0:
+                est = list(filter(lambda x: x.produto.nome == novoNome, x))
+                if len(est) == 0:
+                    x = list(map(lambda x: Estoque(Produtos(novoNome, novoPreco, novaCategoria, novaQuantidade) if(x.produto.nome == nomeAlterar) else(x), x)))
+                    print('Produto alterado com sucesso')
+            else:
+                print("Produto inexistente")
+
+            with open('estoque.txt', 'w') as arq:
+                for i in x:
+                    arq.writelines(i.produto.nome + "|" + i.produto.preco + "|" +
+                            i.categoria + "|" + str(i.quantidade))
+                arq.writelines('\n')
+
+        else:
+            print('A categoria informada não existe.')
+
+    def mostrarEstoque(self):
+            estoque = DaoEstoque.ler()
+            if len(estoque) == 0:
+                print("Estoque vazio.")
+            else:
+                print("=======Produtos=======")
+                for i in estoque:
+                    print(f"Nome: {i.produto.nome}\n"
+                          f"Preco: {i.produto.preco}\n"
+                          f"Categoria: {i.produto.categoria}\n"
+                          f"Quantidade: {i.quantidade}\n")
+                    print("------------------------------")
