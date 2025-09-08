@@ -33,12 +33,12 @@ class DaoVenda:
 
     @classmethod
     def ler(cls):
-        with open('categoria.txt', 'r') as arq:
+        with open('venda.txt', 'r') as arq:
             cls.venda = arq.readlines()
 
     
-        cls.venda = list(map(lambda x: x.replace('\n', cls.venda)))
-        cls.venda = list(map(lambda x: x.replace('|', cls.venda)))
+        cls.venda = list(map(lambda x: x.replace('\n', ''), cls.venda))
+        cls.venda = list(map(lambda x: x.split('|', cls.venda)))
 
         vendidos = []
 
