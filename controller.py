@@ -168,7 +168,7 @@ class ControllerVenda:
 
         for i in temp:
             with open('estoque.txt', 'w') as arq:
-                arq.writelines(i[0].nome + '|' + i[0].preco + '|' + i[0].categoria + '|' + str(i[1]))
+                arq.writelines(i.produto.nome + '|' + i.produto.preco + '|' + i.produto.categoria + '|' + str(i.quantidade))
                 arq.writelines('\n')
 
         if existe == False:
@@ -180,3 +180,53 @@ class ControllerVenda:
         else:
             print("Venda realizada com sucesso!")
             return valorCompra
+        
+    def relatorioProdutos(self):
+        vendas = DaoVenda.ler()
+        produtos = []
+        ordenado = []
+        for i in vendas:
+            nome = i.itensVendidos.nome
+            quantidade = i.quantidadeVendida
+            tamanho = list(filter(lambda x: x['produto'] == nome, produtos))
+            if len(tamanho) > 0:
+                produtos = list(map(lambda x: {'produto': nome, 'quantidade': int(x['quantidade'])+int(quantidade)}
+                                    if(x['produto'] == nome) else(x), produtos))
+            else:
+                produtos.append({'produto': nome, 'quantidade': quantidade})
+
+        ordenado = sorted(produtos, key=lambda k: k['quantidade'], reverse=True)
+        print("Esses são os produtos mais vendidos:")
+        a = 1
+        for i in ordenado:
+            print(f"=============Produto {a} =============")
+            print(f"Produto: {i['produto']}\n"
+                  f"Quantidade: {i['quantidade']}\n")
+            
+            a+=1
+
+    def mostrarVenda(self, dataInicio, dataTermino):
+        vendas = DaoVenda.ler()
+        dataInicio1 = datetime.strptime(dataInicio, '%d/%m/%Y')
+        dataTermino1 = datetime.strptime(dataTermino, '%d/%m/%Y')
+
+        vendas_selecionadas = list(filter(lambda x: datetime.strptime(x.data, '%d/%m/%Y') >= dataInicio1 and 
+                                          datetime.strptime(x.data, '%d/%m/%Y') <= dataTermino1), vendas)
+        
+        cont = 1
+        total = 0
+
+        for i in vendas_selecionadas:
+            print(f"========== Venda {cont} ==========")
+            print(f"Nome: {i.itensVendido.nome}\n"
+                  f"Categoria: {i.itensVendido.categoria}\n"
+                  f"Data: {i.data}\n"
+                  f"Quantidade: {i.quantidadeVendida}\n"
+                  f"Cliente: {i.comprador}\n"
+                  f"Vendedor: {i.vendedor}")
+            
+            total += int(i.itensVendido.preco) * int(i.quantidadeVendida)
+            cont +=1
+
+        print(f"Total vendido: {total}")
+        
